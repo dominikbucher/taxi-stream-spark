@@ -15,7 +15,7 @@ public class StreamingContext {
         if (sparkSession == null) {
             sparkSession = SparkSession
                     .builder()
-                    .appName("TaxiStreamProcessor")
+                    .appName("TaxiStreamProcessorBasePartition")
                     .master("local[*]")
                     .getOrCreate();
         }

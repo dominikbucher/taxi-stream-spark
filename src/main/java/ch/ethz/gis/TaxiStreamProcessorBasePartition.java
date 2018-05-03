@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TaxiStreamProcessor {
+public class TaxiStreamProcessorBasePartition {
     private static int NUM_PARTITIONS = 10;
     private static int NUM_TAXIS = 4;
 
@@ -30,7 +30,7 @@ public class TaxiStreamProcessor {
         // Log only ERROR messages
         StreamingContext.getInstance().sparkContext().setLogLevel("ERROR");
 
-
+        
 
         // Start the streaming pipeline.
         StreamingContext.getInstance().start();
