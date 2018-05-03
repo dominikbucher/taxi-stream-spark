@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
  * bundle is sent to all workers (each handling a partition / share of all taxi data). This means that each worker
  * has to handle n/numWorkers taxis, guaranteeing some scalability (as long as the client requests don't reach
  * enormous numbers).
- *
+ * <p>
  * In any case, the stateful processing forces everything onto the driver, so collecting all ClientRequests there
  * is actually not such a problem.
- *
+ * <p>
  * This does not use the spatial properties of Taxis and ClientRequests.
  */
 public class BasePartitionPipeline implements TaxiStreamPipeline {

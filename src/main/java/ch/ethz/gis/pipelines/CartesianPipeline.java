@@ -19,12 +19,18 @@ import java.util.Comparator;
 /**
  * The idea of the CartesianPipeline is simplicity. Match every taxi with every client and let Spark do the heavy
  * lifting by deciding how to distribute everything.
- *
+ * <p>
  * This does not use the spatial properties of Taxis and ClientRequests.
  */
 public class CartesianPipeline implements TaxiStreamPipeline {
     private static int NUM_TAXIS = 4;
 
+    /**
+     * Gets the best number of partitions. Not really used as for now, as (at least) in local mode doesn't provide
+     * a good result. The number of partitions would be the number of workers * the number of cores of each worker.
+     *
+     * @return The best number of partitions, based on number of workers and CPU cores.
+     */
     private synchronized int getBestNumberOfPartitions() {
         int workers = StreamingContext.getInstance().sparkContext().sc().getExecutorStorageStatus().length - 1;
         int parallelism = StreamingContext.getInstance().sparkContext().sc().defaultParallelism();
