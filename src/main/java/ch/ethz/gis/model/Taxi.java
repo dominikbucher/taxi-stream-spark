@@ -1,6 +1,7 @@
 package ch.ethz.gis.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Taxi implements Serializable {
     private int id;
@@ -15,6 +16,19 @@ public class Taxi implements Serializable {
 
     public Taxi(int id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Taxi that = (Taxi) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     // AUTOGEN ================================================================

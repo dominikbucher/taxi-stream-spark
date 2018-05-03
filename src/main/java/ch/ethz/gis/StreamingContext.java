@@ -12,6 +12,9 @@ public class StreamingContext {
     private static Logger logger = null;
 
     public static JavaStreamingContext getInstance() {
+        // Set some Spark properties.
+        System.setProperty("spark.streaming.blockInterval", "500ms");
+
         if (sparkSession == null) {
             sparkSession = SparkSession
                     .builder()

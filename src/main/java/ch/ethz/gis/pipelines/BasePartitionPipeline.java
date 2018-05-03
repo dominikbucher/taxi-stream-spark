@@ -19,6 +19,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The idea of the BasePartitionPipeline is that all ClientRequests are collected on the driver / master, and this
+ * bundle is sent to all workers (each handling a partition / share of all taxi data). This means that each worker
+ * has to handle n/numWorkers taxis, guaranteeing some scalability (as long as the client requests don't reach
+ * enormous numbers).
+ *
+ * In any case, the stateful processing forces everything onto the driver, so collecting all ClientRequests there
+ * is actually not such a problem.
+ *
+ * This does not use the spatial properties of Taxis and ClientRequests.
+ */
 public class BasePartitionPipeline implements TaxiStreamPipeline {
     private static int NUM_PARTITIONS = 10;
     private static int NUM_TAXIS = 4;
@@ -62,7 +73,7 @@ public class BasePartitionPipeline implements TaxiStreamPipeline {
                                 taxisForRequests.add(new Tuple2<>(t, Util.distance(t.getLon(), t.getLat(), c.getLon(), c.getLat())));
                             }
                             taxisForRequests.sort(Comparator.comparing(Tuple2::_2));
-                            if (taxisForRequests.size() > 2) {
+                            if (taxisForRequests.size() > NUM_TAXIS) {
                                 result.add(new Tuple2<>(c, new ArrayList<>(taxisForRequests.subList(0, NUM_TAXIS))));
                             } else {
                                 result.add(new Tuple2<>(c, taxisForRequests));
@@ -82,7 +93,7 @@ public class BasePartitionPipeline implements TaxiStreamPipeline {
                     list1.sort(Comparator.comparing(Tuple2::_2));
                     return list1;
                 }).mapToPair(taxisForRequest -> {
-                    if (taxisForRequest._2.size() > 2) {
+                    if (taxisForRequest._2.size() > NUM_TAXIS) {
                         return new Tuple2<>(taxisForRequest._1, new ArrayList<>(taxisForRequest._2.subList(0, NUM_TAXIS)));
                     } else {
                         return new Tuple2<>(taxisForRequest._1, taxisForRequest._2);
