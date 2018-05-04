@@ -49,5 +49,6 @@ public class SpatialIndexPipeline implements TaxiStreamPipeline {
         JavaPairDStream<Integer, ClientRequest> clientRequestStream = ClientRequestDStream.createStateful();
 
         // TODO
+
     }
 }
