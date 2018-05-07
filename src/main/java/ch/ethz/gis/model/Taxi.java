@@ -1,5 +1,7 @@
 package ch.ethz.gis.model;
 
+import ch.ethz.gis.partitioner.Point;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,6 +18,10 @@ public class Taxi implements Serializable {
 
     public Taxi(int id) {
         this.id = id;
+    }
+
+    public Point getPoint() {
+        return new Point(lon, lat);
     }
 
     @Override

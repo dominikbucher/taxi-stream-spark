@@ -1,5 +1,7 @@
 package ch.ethz.gis.model;
 
+import ch.ethz.gis.partitioner.Point;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,6 +14,10 @@ public class ClientRequest implements Serializable {
 
     public ClientRequest(int id) {
         this.id = id;
+    }
+
+    public Point getPoint() {
+        return new Point(lon, lat);
     }
 
     @Override
