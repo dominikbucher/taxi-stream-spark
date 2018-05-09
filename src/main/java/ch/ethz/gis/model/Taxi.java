@@ -5,7 +5,7 @@ import ch.ethz.gis.partitioner.Point;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Taxi implements Serializable {
+public class Taxi implements Pointable, Serializable {
     private int id;
     private double lon;
     private double lat;

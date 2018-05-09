@@ -5,7 +5,7 @@ import ch.ethz.gis.partitioner.Point;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class ClientRequest implements Serializable {
+public class ClientRequest implements Pointable, Serializable {
     private int id;
     private double lon;
     private double lat;

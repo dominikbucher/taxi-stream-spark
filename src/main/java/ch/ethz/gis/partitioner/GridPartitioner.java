@@ -1,5 +1,6 @@
 package ch.ethz.gis.partitioner;
 
+import ch.ethz.gis.model.Taxi;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.spark.Partitioner;
 
@@ -76,11 +77,11 @@ public class GridPartitioner extends Partitioner implements Serializable {
                 cellsY == that.cellsY;
     }
 
-    public List<SpatialIndex> createIndexes() {
-        List<SpatialIndex> indexes = new ArrayList<>();
+    public List<SpatialIndex<Taxi>> createIndexes() {
+        List<SpatialIndex<Taxi>> indexes = new ArrayList<>();
         for (int i : new IntRange(0, cellsX - 1).toArray()) {
             for (int j : new IntRange(0, cellsY - 1).toArray()) {
-                SpatialIndex si = new SpatialIndex(left + ((double) i + 0.5) * cellsXSize, bottom + ((double) j + 0.5) * cellsYSize);
+                SpatialIndex<Taxi> si = new SpatialIndex<>(left + ((double) i + 0.5) * cellsXSize, bottom + ((double) j + 0.5) * cellsYSize);
                 System.out.println("Created Spatial Index at (" + si.getPoint().getLon() + ", " + si.getPoint().getLat() + ")");
                 indexes.add(si);
             }
