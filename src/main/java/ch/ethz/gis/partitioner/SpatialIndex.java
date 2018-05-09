@@ -5,9 +5,10 @@ import com.github.davidmoten.rtree.RTree;
 import com.github.davidmoten.rtree.geometry.Geometries;
 import com.github.davidmoten.rtree.geometry.Geometry;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class SpatialIndex {
+public class SpatialIndex implements Serializable {
     private RTree<Integer, Geometry> rTree;
     private double lon;
     private double lat;

@@ -18,6 +18,8 @@ import scala.Function1;
 import scala.Tuple2;
 import scala.Tuple3;
 import scala.collection.Iterator;
+import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
 
@@ -115,7 +117,26 @@ public class SpatialIndexPipeline implements TaxiStreamPipeline, Serializable {
         zippedTaxisForClientRequests.cache();
         zippedTaxisForClientRequests.print();
         zippedTaxisForClientRequests.map(tuple -> tuple._1).foreachRDD(rdd -> {
-            indexesWrap.indexRdd = rdd.mapToPair(si -> new Tuple2<>(si.getPoint(), si));
+            // Have to prune the lineage graph here. This is a bit annoying, but if we simply store the RDD, it will
+            // also store all information about previous RDDs - leading to a StackOverflowError sooner or later.
+            List<SpatialIndex> tmpIdxs = rdd.aggregate(new ArrayList<>(), (list, idx) -> {
+                list.add(idx);
+                return list;
+            }, (list1, list2) -> {
+                list1.addAll(list2);
+                return list1;
+            });
+
+            indexesWrap.indexRdd.unpersist();
+            //indexesWrap.indexRdd = rdd.mapToPair(tuple -> new Tuple2<>(tuple.getPoint(), tuple));
+            //indexesWrap.indexRdd.cache();
+
+            final ClassTag<SpatialIndex> classTag = ClassTag$.MODULE$.apply(SpatialIndex.class);
+            JavaRDD<SpatialIndex> tempIndexRDD = new JavaRDD<>(rdd.context()
+                    .parallelize(JavaConverters.collectionAsScalaIterableConverter(tmpIdxs).asScala().toSeq(),
+                            gridPartitioner.numPartitions(), classTag), classTag);
+            indexesWrap.indexRdd = tempIndexRDD.mapToPair(index -> new Tuple2<>(index.getPoint(), index))
+                    .partitionBy(gridPartitioner);
         });
     }
 
@@ -126,29 +147,37 @@ public class SpatialIndexPipeline implements TaxiStreamPipeline, Serializable {
         public Iterator<Tuple2<SpatialIndex, List<Tuple2<Point, Taxi>>>> apply(Iterator<Tuple2<Point, Taxi>> taxis,
                                                                                Iterator<Tuple2<Point, ClientRequest>> clientRequests,
                                                                                Iterator<Tuple2<Point, SpatialIndex>> indexes) {
-            // If this line is enabled, the iterators are empty below (one would have to iterate over the lists then,
-            // but that is a tad bit less efficient).
-            // System.out.println("Working on one partition (#taxis: " + taxis.toList().size() + ", #clientRequests: " +
-            //         clientRequests.toList().size() + ", #spatialIndexes: " + indexes.toList().size() + ")");
-            if (indexes.hasNext()) {
-                SpatialIndex i = indexes.next()._2;
-                List<Tuple2<Point, Taxi>> taxiResults = new ArrayList<>();
+            // This might not be the best way, but like this we can print out the number of Taxis, ClientRequests and
+            // SpatialIndexes on each partition easily.
+            List<Tuple2<Point, Taxi>> taxiList = JavaConversions.seqAsJavaList(taxis.toList());
+            List<Tuple2<Point, ClientRequest>> clientRequestsList = JavaConversions.seqAsJavaList(clientRequests.toList());
+            List<Tuple2<Point, SpatialIndex>> indexesList = JavaConversions.seqAsJavaList(indexes.toList());
 
-                // System.out.println(i.getrTree().size());
-                if (indexes.hasNext()) {
-                    System.err.println("Having more than one spatial index on a worker. This should not happen!");
-                }
-
-                while (taxis.hasNext()) {
-                    // Have to remove old taxi from the RTree first, and then add the new one (position).
-                    Taxi t = taxis.next()._2;
-                    taxiResults.add(new Tuple2<>(t.getPoint(), t));
-                }
-
-                // Here we need to return everything we eventually need: The updated SpatialIndex, and
-                // the Taxi/ClientRequest matches. The SpatialIndex will then update the one from the previous batch.
+            System.out.println("Working on one partition (#taxis: " + taxiList.size() + ", #clientRequests: " +
+                    clientRequestsList.size() + ", #spatialIndexes: " + indexesList.size() + ")");
+            if (indexesList.size() > 0) {
                 List<Tuple2<SpatialIndex, List<Tuple2<Point, Taxi>>>> results = new ArrayList<>();
-                results.add(new Tuple2<>(i, taxiResults));
+
+                for (Tuple2<Point, SpatialIndex> tuple : indexesList) {
+                    SpatialIndex i = tuple._2;
+                    List<Tuple2<Point, Taxi>> taxiResults = new ArrayList<>();
+
+                    // System.out.println(i.getrTree().size());
+                    if (indexesList.size() > 1) {
+                        System.err.println("Having more than one spatial index on a worker. This should not happen!");
+                    }
+
+                    for (Tuple2<Point, Taxi> taxi : taxiList) {
+                        // Have to remove old taxi from the RTree first, and then add the new one (position).
+                        Taxi t = taxi._2;
+                        taxiResults.add(new Tuple2<>(t.getPoint(), t));
+                    }
+
+                    // Here we need to return everything we eventually need: The updated SpatialIndex, and
+                    // the Taxi/ClientRequest matches. The SpatialIndex will then update the one from the previous batch.
+                    results.add(new Tuple2<>(i, taxiResults));
+                }
+
                 return scala.collection.JavaConverters.asScalaIteratorConverter(results.iterator()).asScala();
             } else {
                 return scala.collection.JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<SpatialIndex,

@@ -18,6 +18,8 @@ public class TaxiStreamProcessor {
         System.setProperty("hadoop.home.dir", "C:\\Programs\\Hadoop-adds");
         // we need the KryoSerializer to serialize rTrees and such.
         System.setProperty("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
+        System.setProperty("spark.executor.extraJavaOptions", "-XX:ThreadStackSize=2048 -Xss32m");
+        System.setProperty("spark.driver.extraJavaOptions", "-XX:ThreadStackSize=2048 -Xss32m");
 
         // Log only ERROR messages.
         StreamingContext.getInstance().sparkContext().setLogLevel("ERROR");
