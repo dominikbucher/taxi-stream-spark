@@ -198,7 +198,7 @@ public class SpatialIndexPipeline implements TaxiStreamPipeline, Serializable {
                 // all with all again (or we adjust the grid partitioner).
                 // FIXME For now it is left open how this partition keeps state... we cannot simply look at all the taxis
                 // FIXME in this batch (the other partitions keep track via their Spatial Index).
-                System.out.println("Working on one partition (#taxis: " + taxiList.size() + ", #clientRequests: " +
+                System.out.println("In overflow partition (#taxis: " + taxiList.size() + ", #clientRequests: " +
                         clientRequests.size() + ", #spatialIndexes: " + indexesList.size() + ")");
                 return scala.collection.JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<SpatialIndex<Taxi>,
                         List<Tuple2<ClientRequest, List<Taxi>>>>>().iterator()).asScala();
@@ -222,7 +222,7 @@ public class SpatialIndexPipeline implements TaxiStreamPipeline, Serializable {
                     i.remove(t);
                     i.add(t);
                 }
-                System.out.println("In partition (#taxis: " + taxiList.size() + ", #clientRequests: " +
+                System.out.println("In          partition (#taxis: " + taxiList.size() + ", #clientRequests: " +
                         clientRequests.size() + ", #spatialIndexes: " + indexesList.size() + ", #taxis in spatial index: " +
                         i.getrTree().size() + ", #unique taxis: " + taxiList.stream().map(taxi -> taxi._2.getId())
                         .collect(Collectors.toSet()).size() + ", #taxis to remove: " + transitioningTaxiList.size() + ")");
