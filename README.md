@@ -98,17 +98,17 @@ The password for the postgres database user is password.
 ## Spark
 Start the master using 
 ```
-spark-class org.apache.spark.deploy.master.Master
+C:\sprk\spark-2.3.0-bin-hadoop2.7\bin\spark-class org.apache.spark.deploy.master.Master
 ```
 
 And the workers using:
 ```
-spark-class org.apache.spark.deploy.worker.Worker --master spark://129.132.26.208:7077
+C:\sprk\spark-2.3.0-bin-hadoop2.7\bin\spark-class org.apache.spark.deploy.worker.Worker --master spark://129.132.26.208:7077
 ```
 
 Once they're running you can submit a job using:
 ```
-spark-submit.cmd --class "ch.ethz.gis.TaxiStreamProcessor" --master spark://129.132.26.208:7077 --executor-memory 20G C:\sprk\Spark-Taxi-Streaming-0.0.1-jar-with-dependencies.jar cartesianKnn 2000 true C:\sprk 127.0.0.1:5432/taxi-streaming hdfs://129.132.26.208:19000/checkpoint
+C:\sprk\spark-2.3.0-bin-hadoop2.7\bin\spark-submit.cmd --class "ch.ethz.gis.TaxiStreamProcessor" --master spark://129.132.26.208:7077 --executor-memory 20G C:\sprk\Spark-Taxi-Streaming-0.0.1-jar-with-dependencies.jar cartesianKnn 2000 true C:\sprk 127.0.0.1:5432/taxi-streaming hdfs://129.132.26.208:19000/checkpoint
 ```
 
 Important things here:
