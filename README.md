@@ -68,6 +68,14 @@ slaves
 workers (same as slaves)
 ```
 
+On Windows, if your username consists of two words, it is recommended to put the following property in hdfs-site.xml:
+```
+<property>
+  <name>hadoop.tmp.dir</name>
+  <value>/C:/tmp/hdp</value>
+</property>
+```
+
 Then format the (distributed) file system with 
 ```
 C:\sprk\hadoop-3.0.2\hadoop-3.0.2\bin\hdfs.cmd namenode -format
